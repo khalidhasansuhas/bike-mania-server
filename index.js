@@ -13,6 +13,23 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.d5moryc.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+async function run(){
+    try{
+        const usersCollection = client.db('bikeMania').collection('users')
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
+
+    }
+    finally{
+
+    }
+}run().catch(e=> console.log(e));
+
 
 app.get('/', (req, res) => {
     res.send('Bike-Mania server is running')
