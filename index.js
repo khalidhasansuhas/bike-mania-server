@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const jwt = require('jsonwebtoken');
+const { query } = require('express');
 require('dotenv').config();
 
 const app = express();
@@ -16,6 +17,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
         const usersCollection = client.db('bikeMania').collection('users')
+        const bikesCollection = client.db('bikeMania').collection('bikes')
 
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -23,6 +25,20 @@ async function run(){
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
+
+        app.get('/category', async(req, res)=>{
+            
+          let query = {}
+          if(req.query.categoryName){
+            query = {
+                categoryName:req.query.categoryName
+            }
+          }
+            const cursor = bikesCollection.find(query);
+            bikes = await cursor.toArray()
+            
+            res.send(bikes)
+        })
 
     }
     finally{
