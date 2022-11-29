@@ -55,6 +55,13 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/bookings', async(req, res)=>{
+            const email = req.query.email;
+            const query = {email: email};
+            const bookings = await bookingsCollection.find(query).toArray();
+            res.send(bookings);
+        })
+
         app.patch('/bikes/:id', async(req,res)=>{
             const id = req.params.id;
             const status = req.body;
