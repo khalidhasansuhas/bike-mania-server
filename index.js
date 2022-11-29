@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const { query } = require('express');
 require('dotenv').config();
@@ -14,10 +14,19 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.d5moryc.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-async function run(){
-    try{
+async function run() {
+    try {
         const usersCollection = client.db('bikeMania').collection('users')
         const bikesCollection = client.db('bikeMania').collection('bikes')
+        const categoriesCollection = client.db('bikeMania').collection('categories')
+        const bookingsCollection = client.db('bikeMania').collection('bookings')
+
+        app.get('/categories', async(req, res)=>{
+            const query = {}
+            const cursor = categoriesCollection.find(query)
+            const categories = await cursor.toArray();
+            res.send(categories)
+        })
 
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -26,25 +35,45 @@ async function run(){
             res.send(result);
         });
 
-        app.get('/category', async(req, res)=>{
-            
-          let query = {}
-          if(req.query.categoryName){
-            query = {
-                categoryName:req.query.categoryName
+        app.get('/category', async (req, res) => {
+
+            let query = {}
+            if (req.query.categoryName) {
+                query = {
+                    categoryName: req.query.categoryName
+                }
             }
-          }
             const cursor = bikesCollection.find(query);
             bikes = await cursor.toArray()
-            
+
             res.send(bikes)
         })
 
-    }
-    finally{
+        app.post('/bookings', async(req,res)=>{
+            const booking = req.body;
+            const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
+        })
+
+        app.patch('/bikes/:id', async(req,res)=>{
+            const id = req.params.id;
+            const status = req.body;
+            console.log(status)
+            const query = {_id : ObjectId(id)};
+            const updatedDoc = {
+                $set:{
+                    status: status
+                }
+            }
+            const result = await bikesCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
 
     }
-}run().catch(e=> console.log(e));
+    finally {
+
+    }
+} run().catch(e => console.log(e));
 
 
 app.get('/', (req, res) => {
