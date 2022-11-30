@@ -76,7 +76,7 @@ async function run() {
             const user = await usersCollection.findOne(query);
             res.send({isSeller : user?.role === 'seller'});
         })
-        
+
         app.get('/users/buyer/:email', async(req, res)=>{
             const email = req.params.email;
             const query = {email}
@@ -164,6 +164,12 @@ async function run() {
                 }
             }
             const result = await bikesCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
+
+        app.post('/bikes', async(req,res)=>{
+            const product = req.body;
+            const result = await bikesCollection.insertOne(product);
             res.send(result);
         })
 
