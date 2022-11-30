@@ -36,10 +36,17 @@ async function run() {
         const categoriesCollection = client.db('bikeMania').collection('categories')
         const bookingsCollection = client.db('bikeMania').collection('bookings')
 
-        app.post('/jwt', (req, res) => {
-            const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10h' });
-            res.send({ token })
+        app.post('/jwt', async(req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query ={email: email}
+            const user = await usersCollection.findOne(query)
+            if(user){
+
+                const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10h' });
+                return res.send({accessToken: token})
+            }
+            res.status(403).send({ accessToken: ''})
         })
 
         app.get('/categories', async(req, res)=>{
@@ -56,6 +63,23 @@ async function run() {
             res.send(result);
         });
 
+       
+
+        //get users by role
+        app.get('/users', async (req, res) => {
+            let query = {}
+            if (req.query.role) {
+                query = {
+                    role: req.query.role
+                }
+            }
+            const cursor = usersCollection.find(query);
+            users = await cursor.toArray()
+
+            res.send(users)
+        });
+ 
+        
         app.get('/category', async (req, res) => {
 
             let query = {}
