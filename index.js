@@ -63,6 +63,12 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/users/admin/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)}
+            const user = await usersCollection.findOne(query);
+            res.send({isAdmin : user?.role === 'admin'});
+        })
        
 
         //get users by role
@@ -105,6 +111,32 @@ async function run() {
             const query = {email: email};
             const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings);
+        })
+
+        app.put('/users/admin/verify/:id', async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const options = { upsert: true};
+            const updatedDoc = {
+                $set: {
+                    isVerified: 'verified'
+                }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result)
+        })
+
+        app.put('/users/admin/:id', async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const options = { upsert: true};
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result)
         })
 
         app.patch('/bikes/:id', async(req,res)=>{
