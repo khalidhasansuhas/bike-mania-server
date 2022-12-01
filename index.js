@@ -139,6 +139,18 @@ async function run() {
             const result = await usersCollection.updateOne(filter,updatedDoc,options);
             res.send(result)
         })
+        app.put('/bikes/seller/advertize/:id', async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const options = { upsert: true};
+            const updatedDoc = {
+                $set: {
+                    isAdvertized: 'true'
+                }
+            }
+            const result = await bikesCollection.updateOne(filter,updatedDoc,options)
+            res.send(result);
+        })
 
         app.put('/users/admin/:id', async(req,res)=>{
             const id = req.params.id;
@@ -174,10 +186,22 @@ async function run() {
         })
 
         app.get('/bikes',async(req,res)=>{
-            const email = req.query.eamil;
-            const query = {email: email};
+            const email = req.query.sellerEmail;
+            const query = { sellerEmail: email};
             const bookings = await bikesCollection.find(query).toArray();
             res.send(bookings);
+        })
+
+        app.delete('/bikes/:id', async (req, res) => {
+            const {id} = req.params;
+            const result = await bikesCollection.deleteOne({_id: ObjectId(id)})
+            res.send(result);
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const {id} = req.params;
+            const result = await usersCollection.deleteOne({_id: ObjectId(id)})
+            res.send(result);
         })
 
     }
