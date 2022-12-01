@@ -173,6 +173,13 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/bikes',async(req,res)=>{
+            const email = req.query.eamil;
+            const query = {email: email};
+            const bookings = await bikesCollection.find(query).toArray();
+            res.send(bookings);
+        })
+
     }
     finally {
 
